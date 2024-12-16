@@ -20,7 +20,7 @@ fn classification_workflow(file_path: &str, target_column_index: usize) -> Resul
     class_prediction_dataset.c_scale_features(&classification_categorical_columns);
 
     // 3. Subset Features
-    let classification_feature_columns = vec![1, 3, 7, 9, 12];
+    let classification_feature_columns = vec![1, 3, 7, 9, 12, 21, 22, 33, 34];
     let class_subset = class_train_dataset.c_subset(&classification_feature_columns);
 
     // 4. Train Decision Tree Classifier
@@ -49,24 +49,31 @@ fn classification_workflow(file_path: &str, target_column_index: usize) -> Resul
 
 fn main() -> Result<(), Box<dyn Error>> {
     let file_path = "final w: preds.csv";
-
+    
+    for i in [4, 8, 16].iter() {
     // Regression workflow
-    let reg_target_column_index = 4;
+    let reg_target_column_index = *i;
     let (mut train_dataset, mut prediction_dataset) = reg_read_csv(file_path, reg_target_column_index)?;
 
     train_dataset.r_scale_features();
     prediction_dataset.r_scale_features();
-
-    let regression_feature_columns = vec![0, 1, 2, 5, 6, 20, 25, 26, 37, 38];
+    let regression_feature_columns = match reg_target_column_index {
+        4 => vec![0, 1, 2, 5, 6, 20, 25, 26, 37, 38],
+        8 => vec![0, 1, 3, 6, 7, 9, 10, 13, 14, 17, 21, 22, 25, 26, 29, 30, 33,34],
+        16 => vec![0, 1, 3, 6,7, 17, 18, 20,21,22,25,26,37,38,40],         // Feature set for target column 16 (different set)
+         _ => vec![0, 1, 2, 5, 6, 20, 25, 26, 37, 38], // Default feature set (if needed)
+        };
     let reg_subset = train_dataset.r_subset(&regression_feature_columns);
 
     let regression_model = train_regression_tree(&reg_subset)?;
     let reg_prediction_subset = prediction_dataset.r_subset(&regression_feature_columns);
     let reg_predictions = regression_model.predict(&DenseMatrix::from_2d_vec(&reg_prediction_subset.features))?;
 
-    println!("Regression predictions for future games: {:?}", reg_predictions);
+    println!("Regression predictions for column index {:?} for future games: {:?}", i, reg_predictions);
+        
+    }
 
-    // Classification workflow
+    // Classification workflow (Result)
     let class_target_column_index = 2;
     classification_workflow(file_path, class_target_column_index)?;
 

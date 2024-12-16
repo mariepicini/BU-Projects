@@ -108,7 +108,7 @@ pub fn class_read_csv(file_path: &str, target_column_index: usize) -> Result<(CD
             .collect();
 
         if let Ok(row) = row {
-            if index < 2 {
+            if index < 6 {
                 // First two rows are prediction rows
                 prediction_features.push(row);
             } else {
@@ -119,9 +119,9 @@ pub fn class_read_csv(file_path: &str, target_column_index: usize) -> Result<(CD
                 if let Some(target_value) = target_value {
                     features.push(row);
                     target.push(target_value);
-                } else {
-                    eprintln!("Skipping invalid row {}: {:?}", index, record);
-                }
+                } //else {
+                    //eprintln!("Skipping invalid row {}: {:?}", index, record);
+                //}
             }
         } else {
             eprintln!("Error parsing row {}: {:?}", index, record);

@@ -59,9 +59,9 @@ pub fn train_regression_tree(
     let (x_train, x_test, y_train, y_test) = train_test_split(&features, &target, 0.8, true, None);
 
     let params = DecisionTreeRegressorParameters::default()
-        .with_max_depth(3)
-        .with_min_samples_split(10)
-        .with_min_samples_leaf(5);
+        .with_max_depth(5)
+        .with_min_samples_split(20)
+        .with_min_samples_leaf(20);
 
     let model = DecisionTreeRegressor::fit(&x_train, &y_train, params)?;
     println!("Regression tree training successful!");
@@ -141,7 +141,7 @@ pub fn reg_read_csv(file_path: &str, target_column_index: usize) -> Result<(RDat
             .collect();
 
         if let Ok(row) = row {
-            if index < 2 {
+            if index < 6 {
                 // First two rows are prediction rows
                 prediction_features.push(row);
             } else {
@@ -152,9 +152,9 @@ pub fn reg_read_csv(file_path: &str, target_column_index: usize) -> Result<(RDat
                 if let Some(target_value) = target_value {
                     features.push(row);
                     target.push(target_value);
-                } else {
-                    eprintln!("Skipping invalid row {}: {:?}", index, record);
-                }
+                } //else {
+                    //eprintln!("Skipping invalid row {}: {:?}", index, record);
+                //}
             }
         } else {
             eprintln!("Error parsing row {}: {:?}", index, record);
