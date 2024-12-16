@@ -2,8 +2,8 @@ mod classification_tree;
 mod regression_tree;
 
 use smartcore::linalg::basic::matrix::DenseMatrix;
-use regression_tree::{train_regression_tree, reg_read_csv};
-use classification_tree::class_read_csv;
+use regression_tree::{RDataset, train_regression_tree, reg_read_csv};
+use classification_tree::{CDataset, class_read_csv};
 use std::error::Error;
 use smartcore::metrics::accuracy;
 use smartcore::model_selection::train_test_split;
@@ -78,4 +78,74 @@ fn main() -> Result<(), Box<dyn Error>> {
     classification_workflow(file_path, class_target_column_index)?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+#[test]
+fn test_c_subset() {
+    let features = vec![
+        vec![1.0, 2.0, 3.0],
+        vec![4.0, 5.0, 6.0],
+        vec![7.0, 8.0, 9.0],
+    ];
+    let target = vec![0, 1, 2];
+    let dataset = CDataset::new(features.clone(), target.clone());
+    
+    let subset = dataset.c_subset(&[0, 2]);
+    
+    assert_eq!(
+        subset.features,
+        vec![
+            vec![1.0, 3.0],
+            vec![4.0, 6.0],
+            vec![7.0, 9.0],
+        ]
+    );
+    assert_eq!(subset.target, target);
+}
+
+    #[test]
+fn test_c_scale_features() {
+    let mut features = vec![
+        vec![10.0, 1.0, 3.0],
+        vec![20.0, 2.0, 6.0],
+        vec![30.0, 3.0, 9.0],
+    ];
+    let target = vec![0, 1, 2];
+    let mut dataset = CDataset::new(features.clone(), target);
+
+    dataset.c_scale_features(&[1]); // Column 1 is categorical
+
+    let expected_features = vec![
+        vec![0.0, 1.0, 0.0],
+        vec![0.5, 2.0, 0.5],
+        vec![1.0, 3.0, 1.0],
+    ];
+
+    assert_eq!(dataset.features, expected_features);
+}
+
+    #[test]
+fn test_train_regression_tree() {
+    let features = vec![
+        vec![1.0, 2.0],
+        vec![3.0, 4.0],
+        vec![5.0, 6.0],
+        vec![7.0, 8.0],
+        vec![9.0, 10.0],
+    ];
+    let target = vec![2.0, 4.0, 6.0, 8.0, 10.0];
+    let dataset = RDataset::new(features, target);
+
+    let model = train_regression_tree(&dataset).expect("Failed to train regression tree");
+    
+    let test_data = DenseMatrix::from_2d_vec(&vec![vec![2.0, 3.0], vec![6.0, 7.0]]);
+    let predictions = model.predict(&test_data).expect("Failed to make predictions");
+
+    assert!(predictions.len() == 2); // Ensure predictions are made for each row
+    println!("Predictions: {:?}", predictions);
+}
 }
