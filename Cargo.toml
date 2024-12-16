@@ -1,0 +1,9 @@
+[package]
+name = "content"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+smartcore = "0.3.0" 
+csv = "1.1"
+chrono = "0.4"
